@@ -45,6 +45,7 @@ def brocade_san_switch_login(ipaddress, username, password):
     except Exception as e:
         print("Brocade switch login not successful - ", ipaddress)
         print(e)
+        print()
 
 
 def brocade_san_switch_config_backup(ipaddress):
@@ -66,6 +67,7 @@ def brocade_san_switch_config_backup(ipaddress):
     except Exception as e:
         print("Brocade switch login token or endpoint issues - ", call_config_backup.status_code)
         print(e)
+        print()
 
 
 def brocade_san_switch_alias_creation(alias_name, alias_entry_name, ipaddress):
@@ -82,7 +84,6 @@ def brocade_san_switch_alias_creation(alias_name, alias_entry_name, ipaddress):
                 alias_entry_name + '"}}}'
     json_transformation = json.loads(call_data)
     print('Call body being used in this function: ', json_transformation)
-    print()
     try:
         switch_create_alias_url = 'http://' + ipaddress + '/rest/running/brocade-zone/defined-configuration/alias'
         switch_create_alias = requests.post(url=switch_create_alias_url, headers=switch_alias_creation_call_headers,
@@ -94,8 +95,40 @@ def brocade_san_switch_alias_creation(alias_name, alias_entry_name, ipaddress):
     except Exception as e:
         print("Brocade switch login token or endpoint issues - ", switch_create_alias.status_code)
         print(e)
+        print()
 
 
-brocade_san_switch_login('10.60.22.214', 'admin', 'ctcemc123')
-brocade_san_switch_config_backup('10.60.22.214')
-brocade_san_switch_alias_creation('Axel_spa_A1Port3_Test', '50:06:01:63:08:60:1d:e8', '10.60.22.214')
+def brocade_san_switch_zone_creation(zone_name, zone_member_entry_name, ipaddress):
+    """
+    :param zone_name: Provide zone name from the payload
+    :param zone_member_entry_name: Provide members that needs to be part of zone
+    :param ipaddress: Provide switch IP address
+    :return: zone creation status
+    """
+    switch_create_zone_element = ""
+    switch_zone_creation_api_headers = {'Authorization': custom_api_key, 'Accept': 'application/yang-data+json',
+                                        'Content-Type': 'application/yang-data+json'}
+    call_data = '{"zone": {"zone-name": "' + zone_name + '", "zone-type": 0, "member-entry": ' \
+                                                         '{"entry-name": [' + zone_member_entry_name + ']}}}'
+    json_transformation = json.loads(call_data)
+    print('Call body being used in this function: ', json_transformation)
+    try:
+        switch_create_zone_url = 'http://' + ipaddress + '/rest/running/brocade-zone/defined-configuration/zone'
+        switch_create_zone_element = requests.post(url=switch_create_zone_url, headers=switch_zone_creation_api_headers,
+                                                   data=call_data)
+        print("Alias creation status: ", switch_create_zone_element)
+        switch_create_zone_json = json.loads(switch_create_zone_element.content)
+        if switch_create_zone_element.status_code == 200:
+            print("Alias creation is successful - ", switch_create_zone_json)
+    except Exception as e:
+        print("Brocade switch login token or endpoint issues - ", switch_create_zone_element.status_code)
+        print(e)
+        print()
+
+
+brocade_san_switch_login('......', 'admin', '......')
+brocade_san_switch_config_backup('......')
+brocade_san_switch_alias_creation('Axel_spa_A1Port3_Test', '50:06:01:63:08:60:1d:e8', '......')
+brocade_san_switch_alias_creation('Rodge_spa_A4Port3_Test', '50:06:01:63:08:64:0f:45', '......')
+brocade_san_switch_zone_creation('Axel_Rodge_SPA_Test', '"50:06:01:63:08:60:1d:e8", "50:06:01:63:08:64:0f:45"',
+                                 '......')
