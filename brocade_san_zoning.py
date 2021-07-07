@@ -185,13 +185,37 @@ def brocade_san_switch_save_checksum(checksum_value, ipaddress):
         print()
 
 
-# brocade_san_switch_login('10.60.22.214', 'admin', 'ctcemc123')
+def brocade_san_switch_get_new_checksum(ipaddress):
+    """
+    :param ipaddress: Provide switch IP address
+    :return: Returns a new checksum value
+    """
+    switch_zone_get_new_checksum_element = ""
+    switch_zone_get_new_checksum_api_headers = {'Authorization': custom_api_key,
+                                                'Accept': 'application/yang-data+json',
+                                                'Content-Type': 'application/yang-data+json'}
+    try:
+        switch_zone_get_new_checksum_url = 'http://' + ipaddress + '/rest/running/brocade-zone/' \
+                                                                   'effective-configuration/checksum'
+        switch_zone_get_new_checksum_element = requests.get(url=switch_zone_get_new_checksum_url,
+                                                            headers=switch_zone_get_new_checksum_api_headers)
+        print("Switch new checksum value: ", switch_zone_get_new_checksum_element)
+        switch_zone_get_new_checksum_json = json.loads(switch_zone_get_new_checksum_element.content)
+        if switch_zone_get_new_checksum_element.status_code == 200:
+            print("Getting new checksum value successful - ", switch_zone_get_new_checksum_json)
+    except Exception as e:
+        print("Brocade switch login token or endpoint issues - ", switch_zone_get_new_checksum_element.status_code)
+        print(e)
+        print()
+
+
+brocade_san_switch_login('10.60.22.214', 'admin', 'ctcemc123')
 brocade_san_switch_config_backup('10.60.22.214')
-# brocade_san_switch_alias_creation('Axel_spa_A1Port3_Test', '50:06:01:63:08:60:1d:e8', '10.60.22.214')
-# brocade_san_switch_alias_creation('Rodge_spa_A4Port3_Test', '50:06:01:63:08:64:0f:45', '10.60.22.214')
-# brocade_san_switch_zone_creation('Axel_Rodge_SPA_Test', '"50:06:01:63:08:60:1d:e8", "50:06:01:63:08:64:0f:45"',
-#                                 '10.60.22.214')
-# brocade_san_switch_zone_config_update('b238638', '"Axel_Dellpr740A", "Axel_Dellpr740C", '
-#                                                 '"Axel_Rodge_SPA_Test", "Axel_Rodge_SPB", "Rodge-Dellpr730H", '
-#                                                 '"Rodge_Dellpr730E", "dellpr730B_Marge"', '10.60.22.214')
-# brocade_san_switch_save_checksum()
+brocade_san_switch_alias_creation('Axel_spa_A1Port3_Test', '50:06:01:63:08:60:1d:e8', '10.60.22.214')
+brocade_san_switch_alias_creation('Rodge_spa_A4Port3_Test', '50:06:01:63:08:64:0f:45', '10.60.22.214')
+brocade_san_switch_zone_creation('Axel_Rodge_SPA_Test', '"50:06:01:63:08:60:1d:e8", "50:06:01:63:08:64:0f:45"',
+                                 '10.60.22.214')
+brocade_san_switch_zone_config_update('b238638', '"Axel_Dellpr740A", "Axel_Dellpr740C", '
+                                                 '"Axel_Rodge_SPA_Test", "Axel_Rodge_SPB", "Rodge-Dellpr730H", '
+                                                 '"Rodge_Dellpr730E", "dellpr730B_Marge"', '10.60.22.214')
+brocade_san_switch_save_checksum('f1660eb707faa8e5584bdf65ba95a794', '10.60.22.214')
