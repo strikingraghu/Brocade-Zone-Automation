@@ -22,7 +22,7 @@ Functions:
 '''
 
 # Generic Global Variables
-custom_api_key = "Custom_Basic YWRtaW46eHh4OjVlMzE5NTY2ZTIxZWYxOTQzZWJlYmYyMzAwZWJkZjdhYjZiMDgzNjRkNjE2MDMzNzE1NjBmNzgyNDRkM2JiODY="
+custom_api_key = ""
 switch_config_backup_json = ""
 
 
@@ -158,7 +158,7 @@ def brocade_san_switch_zone_config_update(config_name, member_zone_entry_name, i
 
 def brocade_san_switch_save_checksum(checksum_value, ipaddress):
     """
-    :param checksum_value: Provide and save the zone configuration using the zoneDB checksum from login function
+    :param checksum_value: Provide checksum value retrieved from step # 1 (login function)
     :param ipaddress: Provide switch IP address
     :return: Saving configuration to DB status code
     """
@@ -209,6 +209,36 @@ def brocade_san_switch_get_new_checksum(ipaddress):
         print()
 
 
+def brocade_san_switch_enable_new_config(checksum_value, config_name, ipaddress):
+    """
+    :param checksum_value: Provide checksum value retrieved from the previous call
+    :param config_name: Provide the latest configuration name used in switch's config output
+    :param ipaddress: Provide switch IP address
+    :return: Enabling new configuration on the SAN switch
+    """
+    switch_zone_enable_new_config_element = ""
+    switch_zone_enable_new_config_api_headers = {'Authorization': custom_api_key,
+                                                 'Accept': 'application/yang-data+json',
+                                                 'Content-Type': 'application/yang-data+json'}
+    call_data = '{"checksum": "' + checksum_value + '"}'
+    json_transformation = json.loads(call_data)
+    print('Call body being used in this function: ', json_transformation)
+    try:
+        switch_zone_enable_new_config_url = 'http://' + ipaddress + '/rest/running/brocade-zone/' \
+                                                                    'effective-configuration/cfg-name/' + config_name
+        switch_zone_enable_new_config_element = requests.post(url=switch_zone_enable_new_config_url,
+                                                              headers=switch_zone_enable_new_config_api_headers,
+                                                              data=call_data)
+        print("Zone configuration enablement status via new checksum: ", switch_zone_enable_new_config_element)
+        switch_zone_enable_new_config_json = json.loads(switch_zone_enable_new_config_element.content)
+        if switch_zone_enable_new_config_element.status_code == 200:
+            print("Zone configuration is saved to device successful - ", switch_zone_enable_new_config_json)
+    except Exception as e:
+        print("Brocade switch login token or endpoint issues - ", switch_zone_enable_new_config_element.status_code)
+        print(e)
+        print()
+
+
 brocade_san_switch_login('10.60.22.214', 'admin', 'ctcemc123')
 brocade_san_switch_config_backup('10.60.22.214')
 brocade_san_switch_alias_creation('Axel_spa_A1Port3_Test', '50:06:01:63:08:60:1d:e8', '10.60.22.214')
@@ -219,3 +249,5 @@ brocade_san_switch_zone_config_update('b238638', '"Axel_Dellpr740A", "Axel_Dellp
                                                  '"Axel_Rodge_SPA_Test", "Axel_Rodge_SPB", "Rodge-Dellpr730H", '
                                                  '"Rodge_Dellpr730E", "dellpr730B_Marge"', '10.60.22.214')
 brocade_san_switch_save_checksum('f1660eb707faa8e5584bdf65ba95a794', '10.60.22.214')
+brocade_san_switch_get_new_checksum('10.60.22.214')
+# brocade_san_switch_enable_new_config()
