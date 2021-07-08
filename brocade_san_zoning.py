@@ -23,7 +23,7 @@ Functions:
 '''
 
 # Generic Global Variables
-custom_api_key = ""
+custom_api_key = "Custom_Basic YWRtaW46eHh4OjI4ZGVjODZhODQzMThmZTFmOGU4YzgwNWYwMzI5MzM5M2I4Y2VlY2I5N2M5MDY0MzIwYjM1ODNjMzYzN2NjZjI="
 switch_config_backup_json = ""
 
 
@@ -61,16 +61,15 @@ def brocade_san_switch_config_backup(ipaddress):
         switch_config_url = 'http://' + ipaddress + '/rest/running/brocade-zone/effective-configuration'
         switch_config_backup_call_headers = {'Authorization': custom_api_key, 'Accept': 'application/yang-data+json', 'Content-Type': 'application/yang-data+json'}
         call_config_backup = requests.get(url=switch_config_url, headers=switch_config_backup_call_headers)
-        print("Switch zone data: ", call_config_backup)
-        switch_config_backup_json = json.dumps(call_config_backup.content, indent=2)  # Type conversion to dict is required
-        print("Configuration data of the SAN switch before automation: ", switch_config_backup_json)
-        time.sleep(10)
+        switch_config_backup_dict = json.loads(call_config_backup.content)  # Type conversion to dict is required
+        print("Switch zone and members data backup:\n", switch_config_backup_dict)
         if call_config_backup.status_code == 200:
-            print("Switch zone information backed up - ", switch_config_backup_json)
+            print("Switch zone information backed up successfully")
     except Exception as e:
-        print("Brocade switch login token or endpoint issues - ", call_config_backup.status_code)
-        print(e)
-        print()
+        if call_config_backup.status_code != 200:
+            print("Brocade switch login token or endpoint issues - ", call_config_backup.status_code)
+            print(e)
+            print()
 
 
 def brocade_san_switch_alias_creation(alias_name, alias_entry_name, ipaddress):
@@ -225,14 +224,14 @@ def brocade_san_switch_enable_new_config(checksum_value, config_name, ipaddress)
         print()
 
 
-brocade_san_switch_login('10.60.22.214', 'admin', 'ctcemc123')
+# brocade_san_switch_login('10.60.22.214', 'admin', 'ctcemc123')
 brocade_san_switch_config_backup('10.60.22.214')
-brocade_san_switch_alias_creation('Axel_spa_A1Port3_Test', '50:06:01:63:08:60:1d:e8', '10.60.22.214')
-brocade_san_switch_alias_creation('Rodge_spa_A4Port3_Test', '50:06:01:63:08:64:0f:45', '10.60.22.214')
-brocade_san_switch_zone_creation('Axel_Rodge_SPA', 'Axel_spa_A1Port3', 'Rodge_spa_A4Port3', '10.60.22.214')
-brocade_san_switch_zone_creation('Axel_Rodge_SPA_Test', 'Axel_spa_A1Port3_Test', 'Rodge_spa_A4Port3_Test',
-                                 '10.60.22.214')
-brocade_san_switch_zone_config_update('b238638', '10.60.22.214')
-brocade_san_switch_save_checksum('e5e1e7a4919a0fd961159245740aebfd', '10.60.22.214')
+# brocade_san_switch_alias_creation('Axel_spa_A1Port3_Test', '50:06:01:63:08:60:1d:e8', '10.60.22.214')
+# brocade_san_switch_alias_creation('Rodge_spa_A4Port3_Test', '50:06:01:63:08:64:0f:45', '10.60.22.214')
+# brocade_san_switch_zone_creation('Axel_Rodge_SPA', 'Axel_spa_A1Port3', 'Rodge_spa_A4Port3', '10.60.22.214')
+# brocade_san_switch_zone_creation('Axel_Rodge_SPA_Test', 'Axel_spa_A1Port3_Test', 'Rodge_spa_A4Port3_Test',
+#                                 '10.60.22.214')
+# brocade_san_switch_zone_config_update('b238638', '10.60.22.214')
+# brocade_san_switch_save_checksum('e5e1e7a4919a0fd961159245740aebfd', '10.60.22.214')
 # brocade_san_switch_get_new_checksum('10.60.22.214')
-# brocade_san_switch_enable_new_config('e5e1e7a4919a0fd961159245740aebfd', 'b238638', '10.60.22.214')
+# brocade_san_switch_enable_new_config('f9676703bba1f3ac726de1445de27726', 'b238638', '10.60.22.214')
