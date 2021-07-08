@@ -244,11 +244,12 @@ def brocade_san_switch_enable_new_config(checksum_value, config_name, ipaddress)
         print()
 
 
-# brocade_san_switch_login('10.60.22.214', 'admin', 'ctcemc123')
+brocade_san_switch_login('10.60.22.214', 'admin', 'ctcemc123')
 # brocade_san_switch_config_backup('10.60.22.214')
 # brocade_san_switch_alias_creation('Axel_spa_A1Port3_Test', '50:06:01:63:08:60:1d:e8', '10.60.22.214')
 # brocade_san_switch_alias_creation('Rodge_spa_A4Port3_Test', '50:06:01:63:08:64:0f:45', '10.60.22.214')
-# brocade_san_switch_zone_creation('Axel_Rodge_SPA', '50:06:01:63:08:60:1d:e8', '50:06:01:63:08:64:0f:45',
+# brocade_san_switch_zone_creation('Axel_Rodge_SPA', 'Axel_spa_A1Port3', 'Rodge_spa_A4Port3', '10.60.22.214')
+# brocade_san_switch_zone_creation('Axel_Rodge_SPA_Test', 'Axel_spa_A1Port3_Test', 'Rodge_spa_A4Port3_Test',
 #                                 '10.60.22.214')
 # brocade_san_switch_zone_config_update('b238638', '10.60.22.214')
 # brocade_san_switch_save_checksum('c9712b1df97e2cb9d2e692796d6fd415', '10.60.22.214')
