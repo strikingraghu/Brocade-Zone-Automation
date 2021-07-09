@@ -23,8 +23,10 @@ Functions:
 '''
 
 # Generic Global Variables
-custom_api_key = "Custom_Basic YWRtaW46eHh4OjI4ZGVjODZhODQzMThmZTFmOGU4YzgwNWYwMzI5MzM5M2I4Y2VlY2I5N2M5MDY0MzIwYjM1ODNjMzYzN2NjZjI="
+custom_api_key = "Custom_Basic YWRtaW46eHh4OmMwMzVlYzJmYzM3Mzg4ZWJhNWQyYTU0ZTA1MmZiNGFkMWUwNjg2MTYwMGFiZmJmYmQ5NzlmNTc4MzgyMDc2Nzg="
 switch_config_backup_json = ""
+pre_change_checksum = ""
+pre_change_zones_list = []
 
 
 def brocade_san_switch_login(ipaddress, username, password):
@@ -39,7 +41,7 @@ def brocade_san_switch_login(ipaddress, username, password):
         login_url = 'http://' + ipaddress + '/rest/login'
         login = requests.request("POST", login_url, auth=HTTPBasicAuth(username, password))
         print("Brocade login status code: ", login.status_code)
-        time.sleep(10)
+        time.sleep(5)
         if login.status_code == 200:
             custom_api_key = login.headers.get('Authorization')
             print("Login API key retrieved: ", custom_api_key)
@@ -56,6 +58,8 @@ def brocade_san_switch_config_backup(ipaddress):
     :return: Switch configuration data (Backup purpose)
     """
     global switch_config_backup_json
+    global pre_change_checksum
+    global pre_change_zones_list
     call_config_backup = ""
     try:
         switch_config_url = 'http://' + ipaddress + '/rest/running/brocade-zone/effective-configuration'
@@ -63,6 +67,13 @@ def brocade_san_switch_config_backup(ipaddress):
         call_config_backup = requests.get(url=switch_config_url, headers=switch_config_backup_call_headers)
         switch_config_backup_dict = json.loads(call_config_backup.content)  # Type conversion to dict is required
         print("Switch zone and members data backup:\n", switch_config_backup_dict)
+        pre_change_checksum = switch_config_backup_dict['Response']['effective-configuration']['checksum']
+        print("Capturing checksum value before switch config change: ", pre_change_checksum)
+        pre_change_zones = switch_config_backup_dict['Response']['effective-configuration']['enabled-zone']
+        print("Count of existing zones before changes being applied:", len(pre_change_zones))
+        for each_zone in pre_change_zones:
+            pre_change_zones_list.append(each_zone['zone-name'])
+        print("Entire list of zones before changes applied:", pre_change_zones_list)
         if call_config_backup.status_code == 200:
             print("Switch zone information backed up successfully")
     except Exception as e:
@@ -81,16 +92,16 @@ def brocade_san_switch_alias_creation(alias_name, alias_entry_name, ipaddress):
     """
     switch_create_alias = ""
     switch_alias_creation_call_headers = {'Authorization': custom_api_key, 'Accept': 'application/yang-data+json', 'Content-Type': 'application/yang-data+json'}
-    call_data = {"alias": {"alias-name": alias_name, "member-entry": {"alias-entry-name": alias_entry_name}}}
-    json_transformation = json.dumps(call_data, indent=2)
-    print('Call body type being used in this function: ', type(json_transformation), json_transformation)
+    call_data = '{"alias": {"alias-name": '+alias_name+', "member-entry": {"alias-entry-name": '+alias_entry_name+'}}}'
+    json_transformation = json.loads(call_data)
+    print('Call body type being used in this function: ', json_transformation)
     try:
         switch_create_alias_url = 'http://' + ipaddress + '/rest/running/brocade-zone/defined-configuration/alias'
-        switch_create_alias = requests.post(url=switch_create_alias_url, headers=switch_alias_creation_call_headers,
-                                            data=json_transformation)
+        switch_create_alias = requests.post(url=switch_create_alias_url, headers=switch_alias_creation_call_headers, data=json_transformation)
         print("Alias creation status: ", switch_create_alias.status_code)
         switch_alias_create_json = json.loads(switch_create_alias.content)
-        time.sleep(10)
+        print("Output of alias creation call:\n", switch_alias_create_json)
+        time.sleep(5)
         if switch_create_alias.status_code == 201:
             print("Alias creation is successful - ", switch_alias_create_json)
     except Exception as e:
