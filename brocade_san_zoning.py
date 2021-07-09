@@ -76,6 +76,7 @@ def brocade_san_switch_config_backup(ipaddress):
         for each_zone in pre_change_zones:
             pre_change_zones_list.append(each_zone['zone-name'])
         print("Entire list of zones before changes applied:", pre_change_zones_list)
+        time.sleep(5)
         if call_config_backup.status_code == 200:
             print("Switch zone information backed up successfully")
     except Exception as e:
@@ -132,7 +133,7 @@ def brocade_san_switch_zone_creation(zone_name, zone_member_entry_name_1, zone_m
         switch_create_zone_element = requests.post(url=switch_create_zone_url, headers=switch_zone_creation_api_headers, data=json_transformation)
         print("Zone creation status: ", switch_create_zone_element)
         switch_create_zone_json = json.dumps(switch_create_zone_element.content, indent=2)
-        time.sleep(10)
+        time.sleep(5)
         if switch_create_zone_element.status_code == 201:
             print("Zone creation is successful - ", switch_create_zone_json)
     except Exception as e:
@@ -161,7 +162,7 @@ def brocade_san_switch_zone_config_update(config_name, ipaddress):
         switch_save_zone_element = requests.patch(url=switch_save_zone_url, headers=switch_zone_config_update_api_headers, data=json_transformation)
         print("Zone configuration update status: ", switch_save_zone_element)
         switch_save_zone_json = json.dumps(switch_save_zone_element.content, indent=2)
-        time.sleep(10)
+        time.sleep(5)
         if switch_save_zone_element.status_code == 204:
             print("Zone configuration update is successful - ", switch_save_zone_json)
     except Exception as e:
@@ -243,12 +244,12 @@ def brocade_san_switch_enable_new_config(checksum_value, config_name, ipaddress)
         print()
 
 
-# brocade_san_switch_login('10.60.22.214', 'admin', 'ctcemc123')
+brocade_san_switch_login('10.60.22.214', 'admin', 'ctcemc123')
 brocade_san_switch_config_backup('10.60.22.214')
-# brocade_san_switch_alias_creation('Axel_spa_A1Port3_Test', '50:06:01:63:08:60:1d:e8', '10.60.22.214')
-# brocade_san_switch_alias_creation('Rodge_spa_A4Port3_Test', '50:06:01:63:08:64:0f:45', '10.60.22.214')
-# brocade_san_switch_zone_creation('Axel_Rodge_SPA_Test', 'Axel_spa_A1Port3_Test', 'Rodge_spa_A4Port3_Test', '10.60.22.214')
-# brocade_san_switch_zone_config_update('b238638', '10.60.22.214')
+brocade_san_switch_alias_creation('Axel_spa_A1Port3_Test', '50:06:01:63:08:60:1d:e8', '10.60.22.214')
+brocade_san_switch_alias_creation('Rodge_spa_A4Port3_Test', '50:06:01:63:08:64:0f:45', '10.60.22.214')
+brocade_san_switch_zone_creation('Axel_Rodge_SPA_Test', 'Axel_spa_A1Port3_Test', 'Rodge_spa_A4Port3_Test', '10.60.22.214')
+brocade_san_switch_zone_config_update('b238638', '10.60.22.214')
 # brocade_san_switch_save_checksum('e5e1e7a4919a0fd961159245740aebfd', '10.60.22.214')
 # brocade_san_switch_get_new_checksum('10.60.22.214')
 # brocade_san_switch_enable_new_config('f9676703bba1f3ac726de1445de27726', 'b238638', '10.60.22.214')
