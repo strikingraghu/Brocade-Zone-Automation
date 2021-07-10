@@ -23,7 +23,7 @@ Functions:
 '''
 
 # Generic Global Variables
-custom_api_key = ""
+custom_api_key = "Custom_Basic YWRtaW46eHh4OmNkY2UwOTVmYjBkMjdlMjhhNTRkMzJkODkxMDUyYzE1YzNiNjRlMWE4NWViYTM0YWE5MDBjMDU4YjgzZTE5N2U="
 switch_config_name = ""
 switch_config_backup_json = ""
 pre_change_checksum = ""
@@ -116,11 +116,9 @@ def brocade_san_switch_alias_creation(alias_name, alias_entry_name, ipaddress):
         switch_create_alias = requests.post(url=switch_create_alias_url, headers=switch_alias_creation_call_headers,
                                             data=json_transformation)
         print("Alias creation status: ", switch_create_alias.status_code)
-        switch_alias_create_json = json.loads(switch_create_alias.content)
-        print("Output of alias creation call:\n", switch_alias_create_json)
         time.sleep(5)
         if switch_create_alias.status_code == 201:
-            print("Alias creation is successful - ", switch_alias_create_json)
+            print("Alias creation is successful - ", switch_create_alias.status_code)
     except Exception as e:
         if switch_create_alias.status_code != 201:
             print("Brocade switch login token or endpoint issues - ", switch_create_alias.status_code)
@@ -152,7 +150,7 @@ def brocade_san_switch_zone_creation(zone_name, zone_member_entry_name_1, zone_m
         switch_create_zone_element = requests.post(url=switch_create_zone_url,
                                                    headers=switch_zone_creation_api_headers, data=json_transformation)
         print("Zone creation status: ", switch_create_zone_element)
-        switch_create_zone_json = json.dumps(switch_create_zone_element.content, indent=2)
+        switch_create_zone_json = json.loads(switch_create_zone_element.content)
         time.sleep(5)
         if switch_create_zone_element.status_code == 201:
             print("Zone creation is successful - ", switch_create_zone_json)
@@ -192,8 +190,8 @@ def brocade_san_switch_zone_config_update(ipaddress):
         switch_save_zone_element = requests.patch(url=switch_save_zone_url,
                                                   headers=switch_zone_config_update_api_headers,
                                                   data=json_transformation)
-        print("Zone configuration update status: ", switch_save_zone_element.content)
-        switch_save_zone_json = json.dumps(switch_save_zone_element.content, indent=2)
+        print("Zone configuration update status: ", switch_save_zone_element.status_code)
+        switch_save_zone_json = json.loads(switch_save_zone_element.content)
         time.sleep(5)
         if switch_save_zone_element.status_code == 204:
             print("Zone configuration update is successful - ", switch_save_zone_json)
@@ -221,12 +219,11 @@ def brocade_san_switch_save_checksum(ipaddress):
     print('Call body being used in this function: ', json_transformation)
     try:
         switch_zonedb_save_url = 'http://' + ipaddress + '/rest/running/brocade-zone/effective-configuration/cfg-action/1'
-        print(switch_zonedb_save_url)
         switch_zonedb_save_element = requests.patch(url=switch_zonedb_save_url,
                                                     headers=switch_zone_config_save_zonedb_api_headers,
                                                     data=json_transformation)
-        print("Zone configuration update status: ", switch_zonedb_save_element.content)
-        switch_zonedb_save_zone_json = json.dumps(switch_zonedb_save_element.content, indent=2)
+        print("Zone configuration update status: ", switch_zonedb_save_element.status_code)
+        switch_zonedb_save_zone_json = json.loads(switch_zonedb_save_element.content)
         time.sleep(5)
         if switch_zonedb_save_element.status_code == 204:
             print("Zone configuration is saved to device successful - ", switch_zonedb_save_zone_json)
@@ -256,7 +253,8 @@ def brocade_san_switch_get_new_checksum(ipaddress):
         switch_zone_get_new_checksum_json = json.loads(switch_zone_get_new_checksum_element.content)
         post_change_checksum = switch_zone_get_new_checksum_json['Response']['effective-configuration']['checksum']
         print("New checksum value: ", post_change_checksum)
-        time.sleep(10)
+        print("Status of getting new checksum call - ", switch_zone_get_new_checksum_element.status_code)
+        time.sleep(5)
         if switch_zone_get_new_checksum_element.status_code == 200:
             print("Getting new checksum value successful - ", switch_zone_get_new_checksum_json)
     except Exception as e:
@@ -287,11 +285,10 @@ def brocade_san_switch_enable_new_config(ipaddress):
         switch_zone_enable_new_config_element = requests.patch(url=switch_zone_enable_new_config_url,
                                                                headers=switch_zone_enable_new_config_api_headers,
                                                                data=json_transformation)
-        print("Zone configuration enablement status via new checksum: ", switch_zone_enable_new_config_element.content)
-        switch_zone_enable_new_config_json = json.loads(switch_zone_enable_new_config_element.content, indent=2)
+        print("Zone configuration enablement status via new checksum: ", switch_zone_enable_new_config_element.status_code)
         time.sleep(5)
         if switch_zone_enable_new_config_element.status_code == 204:
-            print("Zone configuration is saved to device successful - ", switch_zone_enable_new_config_json)
+            print("Zone configuration is saved to device successful")
     except Exception as e:
         if switch_zone_enable_new_config_element.status_code != 204:
             print("Brocade switch login token or endpoint issues - ", switch_zone_enable_new_config_element.status_code)
@@ -301,7 +298,7 @@ def brocade_san_switch_enable_new_config(ipaddress):
     print()
 
 
-brocade_san_switch_login('10.60.22.214', 'admin', 'ctcemc123')
+# brocade_san_switch_login('10.60.22.214', 'admin', 'ctcemc123')
 brocade_san_switch_config_backup('10.60.22.214')
 brocade_san_switch_alias_creation('Axel_spa_A1Port3_Test', '50:06:01:63:08:60:1d:e8', '10.60.22.214')
 brocade_san_switch_alias_creation('Rodge_spa_A4Port3_Test', '50:06:01:63:08:64:0f:45', '10.60.22.214')
