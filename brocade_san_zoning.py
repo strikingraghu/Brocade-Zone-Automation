@@ -23,7 +23,7 @@ Functions:
 '''
 
 # Generic Global Variables
-custom_api_key = "Custom_Basic YWRtaW46eHh4OmNkY2UwOTVmYjBkMjdlMjhhNTRkMzJkODkxMDUyYzE1YzNiNjRlMWE4NWViYTM0YWE5MDBjMDU4YjgzZTE5N2U="
+custom_api_key = "Custom_Basic YWRtaW46eHh4Ojg0MzEwOGRlYjIzNDA4OTQ5ZDVmZTZiZTMwZDQzMmQyYTE0MzUxMTU1OTRkM2QzMTViYTJhZjY5MzIwYmZiMTg="
 switch_config_name = ""
 switch_config_backup_json = ""
 pre_change_checksum = ""
@@ -98,7 +98,6 @@ def brocade_san_switch_config_backup(ipaddress):
     print()
 
 
-
 def brocade_san_switch_alias_creation(alias_name, alias_entry_name, ipaddress):
     """
     :param alias_name: Provide alias name from the payload
@@ -164,8 +163,9 @@ def brocade_san_switch_zone_creation(zone_name, zone_member_entry_name_1, zone_m
     print()
 
 
-def brocade_san_switch_zone_config_update(ipaddress):
+def brocade_san_switch_zone_config_update(zone_name, ipaddress):
     """
+    :param zone_name: Provide a zone_name to be added into the configuration
     :param ipaddress: Provide switch IP address
     :return: zone save status
     """
@@ -173,12 +173,15 @@ def brocade_san_switch_zone_config_update(ipaddress):
     all_zones_list = []
     print("Access the switch configuration name in this method:\n", switch_config_name)
     print("Access the list of existing zones:\n", pre_change_zones_list)
-    print("Access the new zone added in this execution:\n", new_zone_name)
+    print("Accessing the (global value) new zone added in this execution:\n", new_zone_name)
+    print("Accessing the new zone to be removed and provided via function parameter:\n", zone_name)
     for each_element in pre_change_zones_list:
         all_zones_list.append(each_element)
-    all_zones_list.append(new_zone_name)
+    all_zones_list.append(zone_name)
+    time.sleep(5)
     print("List of all zones including the new ones created in this execution:", all_zones_list)
     print("Number of all zones including the new ones created in this execution:", len(all_zones_list))
+    time.sleep(5)
     switch_save_zone_element = ""
     switch_zone_config_update_api_headers = {'Authorization': custom_api_key,
                                              'Accept': 'application/yang-data+json',
@@ -186,6 +189,7 @@ def brocade_san_switch_zone_config_update(ipaddress):
     call_data = {'cfg': {'cfg-name': switch_config_name, 'member-zone': {'zone-name': all_zones_list}}}
     json_transformation = json.dumps(call_data, indent=3)
     print('Call body being used in this function: ', json_transformation)
+    time.sleep(5)
     try:
         switch_save_zone_url = 'http://' + ipaddress + '/rest/running/brocade-zone/defined-configuration/cfg'
         switch_save_zone_element = requests.patch(url=switch_save_zone_url,
@@ -218,6 +222,7 @@ def brocade_san_switch_save_checksum(ipaddress):
     call_data = {'checksum': pre_change_checksum}
     json_transformation = json.dumps(call_data, indent=2)
     print('Call body being used in this function: ', json_transformation)
+    time.sleep(5)
     try:
         switch_zonedb_save_url = 'http://' + ipaddress + '/rest/running/brocade-zone/effective-configuration/cfg-action/1'
         switch_zonedb_save_element = requests.patch(url=switch_zonedb_save_url,
@@ -247,6 +252,7 @@ def brocade_san_switch_get_new_checksum(ipaddress):
     switch_zone_get_new_checksum_api_headers = {'Authorization': custom_api_key,
                                                 'Accept': 'application/yang-data+json',
                                                 'Content-Type': 'application/yang-data+json'}
+
     try:
         switch_zone_get_new_checksum_url = 'http://' + ipaddress + '/rest/running/brocade-zone/effective-configuration/checksum'
         switch_zone_get_new_checksum_element = requests.get(url=switch_zone_get_new_checksum_url,
@@ -286,7 +292,8 @@ def brocade_san_switch_enable_new_config(ipaddress):
         switch_zone_enable_new_config_element = requests.patch(url=switch_zone_enable_new_config_url,
                                                                headers=switch_zone_enable_new_config_api_headers,
                                                                data=json_transformation)
-        print("Zone configuration enablement status via new checksum: ", switch_zone_enable_new_config_element.status_code)
+        print("Zone configuration enablement status via new checksum: ",
+              switch_zone_enable_new_config_element.status_code)
         time.sleep(5)
         if switch_zone_enable_new_config_element.status_code == 204:
             print("Zone configuration is saved to device successful")
@@ -308,14 +315,14 @@ def brocade_san_switch_alias_deletion(alias_name, alias_entry_name, ipaddress):
     """
     switch_delete_alias = ""
     switch_alias_delete_call_headers = {'Authorization': custom_api_key, 'Accept': 'application/yang-data+json',
-                                          'Content-Type': 'application/yang-data+json'}
+                                        'Content-Type': 'application/yang-data+json'}
     call_data = {'alias': {'alias-name': alias_name, 'member-entry': {'alias-entry-name': alias_entry_name}}}
     json_transformation = json.dumps(call_data, indent=2)
     print('Alias delete call body type being used in this function: ', json_transformation)
     try:
         switch_delete_alias_url = 'http://' + ipaddress + '/rest/running/brocade-zone/defined-configuration/alias'
         switch_delete_alias = requests.delete(url=switch_delete_alias_url, headers=switch_alias_delete_call_headers,
-                                            data=json_transformation)
+                                              data=json_transformation)
         print("Alias deletion status: ", switch_delete_alias.status_code)
         time.sleep(5)
         if switch_delete_alias.status_code == 204:
@@ -329,11 +336,9 @@ def brocade_san_switch_alias_deletion(alias_name, alias_entry_name, ipaddress):
     print()
 
 
-def brocade_san_switch_zone_deletion(zone_name, zone_member_entry_name_1, zone_member_entry_name_2, ipaddress):
+def brocade_san_switch_zone_deletion(zone_name, ipaddress):
     """
     :param zone_name: Provide zone name from the payload
-    :param zone_member_entry_name_1: Provide member that needs to be part of zone
-    :param zone_member_entry_name_2: Provide member that needs to be part of zone
     :param ipaddress: Provide switch IP address
     :return: zone deletion status
     """
@@ -341,43 +346,75 @@ def brocade_san_switch_zone_deletion(zone_name, zone_member_entry_name_1, zone_m
     delete_zone_name = zone_name
     switch_delete_zone_element = ""
     switch_zone_delete_api_headers = {'Authorization': custom_api_key, 'Accept': 'application/yang-data+json',
-                                        'Content-Type': 'application/yang-data+json'}
-    call_data = {'zone': {'zone-name': zone_name, 'zone-type': 0,
-                          'member-entry': {'entry-name': [zone_member_entry_name_1, zone_member_entry_name_2]}}}
-    json_transformation = json.dumps(call_data, indent=2)
-    print('Zone delete call body being used in this function: ', json_transformation)
+                                      'Content-Type': 'application/yang-data+json'}
     try:
-        switch_delete_zone_url = 'http://' + ipaddress + '/rest/running/brocade-zone/defined-configuration/zone'
-        switch_delete_zone_element = requests.delete(url=switch_delete_zone_url,
-                                                   headers=switch_zone_delete_api_headers, data=json_transformation)
-        print("Switch zone deletion status: ", switch_delete_zone_element)
-        switch_delete_zone_json = json.loads(switch_delete_zone_element.content)
+        zone_delete_url = 'http://' + ipaddress + '/rest/running/brocade-zone/defined-configuration/zone/zone-name/' + delete_zone_name
+        switch_delete_zone_element = requests.delete(url=zone_delete_url, headers=switch_zone_delete_api_headers)
+        print("Switch zone deletion status: ", switch_delete_zone_element.status_code)
         time.sleep(5)
-        if switch_delete_zone_element.status_code == 201:
-            print("Zone creation is successful - ", switch_delete_zone_json)
+        if switch_delete_zone_element.status_code == 204:
+            print("Zone deletion is successful and return code is - ", switch_delete_zone_element.status_code)
     except Exception as e:
-        if switch_delete_zone_element.status_code != 201:
+        if switch_delete_zone_element.status_code != 204:
             print("Brocade switch login token or endpoint issues - ", switch_delete_zone_element.status_code)
             print(e)
     print()
     print('=================================================================')
     print()
+
+
+def brocade_san_switch_zone_delete_config_removal(zone_name, ipaddress):
+    """
+    :param zone_name: Zone name to be removed from Zone configuration
+    :param ipaddress: Provide switch IP address
+    :return: zone config save status after zone entry removal
+    """
+
+    local_zone_deletion_list = [zone_name]
+    switch_save_zone_element = ""
+    switch_zone_config_update_api_headers = {'Authorization': custom_api_key,
+                                             'Accept': 'application/yang-data+json',
+                                             'Content-Type': 'application/yang-data+json'}
+    call_data = {'cfg': {'cfg-name': switch_config_name, 'member-zone': {'zone-name': local_zone_deletion_list}}}
+    json_transformation = json.dumps(call_data, indent=3)
+    print('Call body being used in this function: ', json_transformation)
+    try:
+        switch_save_zone_url = 'http://' + ipaddress + '/rest/running/brocade-zone/defined-configuration/cfg'
+        switch_save_zone_element = requests.delete(url=switch_save_zone_url,
+                                                   headers=switch_zone_config_update_api_headers,
+                                                   data=json_transformation)
+        print("Zone configuration update status after removal of entries: ", switch_save_zone_element.status_code)
+        switch_save_zone_json = json.loads(switch_save_zone_element.content)
+        time.sleep(5)
+        if switch_save_zone_element.status_code == 204:
+            print("Zone entry removal and configuration update is successful - ", switch_save_zone_json)
+    except Exception as e:
+        if switch_save_zone_element.status_code != 204:
+            print("Brocade switch login token or endpoint issues - ", switch_save_zone_element.status_code)
+            print(e)
+    print()
+    print('=================================================================')
+    print()
+
+
 # Alias Creation, Zone Creation & Zone Config Commit Flow
 # brocade_san_switch_login('10.60.22.214', 'admin', 'ctcemc123')
 # brocade_san_switch_config_backup('10.60.22.214')
 # brocade_san_switch_alias_creation('Axel_spa_A1Port3_Test', '50:06:01:63:08:60:1d:e8', '10.60.22.214')
 # brocade_san_switch_alias_creation('Rodge_spa_A4Port3_Test', '50:06:01:63:08:64:0f:45', '10.60.22.214')
 # brocade_san_switch_zone_creation('Axel_Rodge_SPA_Test', 'Axel_spa_A1Port3_Test', 'Rodge_spa_A4Port3_Test', '10.60.22.214')
-# brocade_san_switch_zone_config_update('10.60.22.214')
+# brocade_san_switch_zone_config_update('Axel_Rodge_SPA_Test', '10.60.22.214')
 # brocade_san_switch_save_checksum('10.60.22.214')
 # brocade_san_switch_get_new_checksum('10.60.22.214')
 # brocade_san_switch_enable_new_config('10.60.22.214')
 
+
 # Alias Deletion, Zone Deletion & Zone Config Commit Flow
-brocade_san_switch_login('10.60.22.214', 'admin', 'ctcemc123')
+# brocade_san_switch_login('10.60.22.214', 'admin', 'ctcemc123')
 brocade_san_switch_config_backup('10.60.22.214')
 brocade_san_switch_alias_deletion('Axel_spa_A1Port3_Test', '50:06:01:63:08:60:1d:e8', '10.60.22.214')
 brocade_san_switch_alias_deletion('Rodge_spa_A4Port3_Test', '50:06:01:63:08:64:0f:45', '10.60.22.214')
+brocade_san_switch_zone_deletion('Axel_Rodge_SPA_Test', '10.60.22.214')
 brocade_san_switch_save_checksum('10.60.22.214')
 brocade_san_switch_get_new_checksum('10.60.22.214')
 brocade_san_switch_enable_new_config('10.60.22.214')
