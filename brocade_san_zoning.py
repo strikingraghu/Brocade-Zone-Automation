@@ -219,6 +219,7 @@ def brocade_san_switch_save_checksum(ipaddress):
     switch_zone_config_save_zonedb_api_headers = {'Authorization': custom_api_key,
                                                   'Accept': 'application/yang-data+json',
                                                   'Content-Type': 'application/yang-data+json'}
+    print("Checksum value coming from previous functions:\n", pre_change_checksum)
     call_data = {'checksum': pre_change_checksum}
     json_transformation = json.dumps(call_data, indent=2)
     print('Call body being used in this function: ', json_transformation)
@@ -399,22 +400,23 @@ def brocade_san_switch_zone_delete_config_removal(zone_name, ipaddress):
 
 # Alias Creation, Zone Creation & Zone Config Commit Flow
 # brocade_san_switch_login('10.60.22.214', 'admin', 'ctcemc123')
-# brocade_san_switch_config_backup('10.60.22.214')
-# brocade_san_switch_alias_creation('Axel_spa_A1Port3_Test', '50:06:01:63:08:60:1d:e8', '10.60.22.214')
-# brocade_san_switch_alias_creation('Rodge_spa_A4Port3_Test', '50:06:01:63:08:64:0f:45', '10.60.22.214')
-# brocade_san_switch_zone_creation('Axel_Rodge_SPA_Test', 'Axel_spa_A1Port3_Test', 'Rodge_spa_A4Port3_Test', '10.60.22.214')
-# brocade_san_switch_zone_config_update('Axel_Rodge_SPA_Test', '10.60.22.214')
-# brocade_san_switch_save_checksum('10.60.22.214')
-# brocade_san_switch_get_new_checksum('10.60.22.214')
-# brocade_san_switch_enable_new_config('10.60.22.214')
+brocade_san_switch_config_backup('10.60.22.214')
+brocade_san_switch_alias_creation('Axel_spa_A1Port3_Test', '50:06:01:63:08:60:1d:e8', '10.60.22.214')
+brocade_san_switch_alias_creation('Rodge_spa_A4Port3_Test', '50:06:01:63:08:64:0f:45', '10.60.22.214')
+brocade_san_switch_zone_creation('Axel_Rodge_SPA_Test', 'Axel_spa_A1Port3_Test', 'Rodge_spa_A4Port3_Test', '10.60.22.214')
+brocade_san_switch_zone_config_update('Axel_Rodge_SPA_Test', '10.60.22.214')
+brocade_san_switch_save_checksum('10.60.22.214')
+brocade_san_switch_get_new_checksum('10.60.22.214')
+brocade_san_switch_enable_new_config('10.60.22.214')
 
 
 # Alias Deletion, Zone Deletion & Zone Config Commit Flow
 # brocade_san_switch_login('10.60.22.214', 'admin', 'ctcemc123')
-brocade_san_switch_config_backup('10.60.22.214')
-brocade_san_switch_alias_deletion('Axel_spa_A1Port3_Test', '50:06:01:63:08:60:1d:e8', '10.60.22.214')
-brocade_san_switch_alias_deletion('Rodge_spa_A4Port3_Test', '50:06:01:63:08:64:0f:45', '10.60.22.214')
-brocade_san_switch_zone_deletion('Axel_Rodge_SPA_Test', '10.60.22.214')
-brocade_san_switch_save_checksum('10.60.22.214')
-brocade_san_switch_get_new_checksum('10.60.22.214')
-brocade_san_switch_enable_new_config('10.60.22.214')
+# brocade_san_switch_config_backup('10.60.22.214')
+# brocade_san_switch_alias_deletion('Axel_spa_A1Port3_Test', '50:06:01:63:08:60:1d:e8', '10.60.22.214')
+# brocade_san_switch_alias_deletion('Rodge_spa_A4Port3_Test', '50:06:01:63:08:64:0f:45', '10.60.22.214')
+# brocade_san_switch_zone_deletion('Axel_Rodge_SPA_Test', '10.60.22.214')
+# brocade_san_switch_zone_delete_config_removal('Axel_Rodge_SPA_Test', '10.60.22.214')
+# brocade_san_switch_save_checksum('10.60.22.214')
+# brocade_san_switch_get_new_checksum('10.60.22.214')
+# brocade_san_switch_enable_new_config('10.60.22.214')
