@@ -9,17 +9,23 @@ import time
 DOCUMENTATION = '''
 Python code developed for automating 'Brocade SAN Zoning' tasks performed by Network/Storage team.
 Functions:
-    a) Logging into Brocade switch
-    b) Taking backup of existing zone configuration
-    c) Creating alias
-    d) Creating zone
-    e) Adding new zone configuration
-    f) Saving new zone configuration
-    g) Taking backup of switch after configuration changes
-    h) Taking backup of zone configuration after changes
-    i) Enabling port
-    j) Disabling Port
-    k) Logout from the Brocade switch
+    Logging into Brocade switch
+    Taking backup of existing zone configuration
+    Creating alias
+    Creating zone
+    Committing zone information
+    Adding new zones configuration
+    Permanently saving switch configuration
+    Logout from the Brocade switch
+    
+    Logging into Brocade switch
+    Taking backup of existing zone configuration
+    Deleting alias
+    Deleting zone(s)
+    Committing zone information after deletions/removals
+    Enabling configurations after zone deletions
+    Permanently saving switch configuration
+    Logout from the Brocade switch
 '''
 
 # Generic Global Variables
@@ -50,7 +56,7 @@ def brocade_san_switch_login(ipaddress, username, password):
         if login.status_code == 200:
             custom_api_key = login.headers.get('Authorization')
             print("Login API key retrieved: ", custom_api_key)
-            print("Brocade switch login successful - ", ipaddress)
+            print("Function 01 - Brocade switch login successful - ", ipaddress)
     except Exception as e:
         if login.status_code != 200:
             print("Function 01 - Brocade switch login not successful - ", ipaddress)
@@ -88,7 +94,7 @@ def brocade_san_switch_config_backup(ipaddress):
         print("Entire list of zones before changes applied:", pre_change_zones_list)
         time.sleep(5)
         if call_config_backup.status_code == 200:
-            print("Switch zone information backed up successfully")
+            print("Function 02 - Switch zone information backed up successfully")
     except Exception as e:
         if call_config_backup.status_code != 200:
             print("Function 02 - Brocade switch login token or endpoint issues - ", call_config_backup.status_code)
@@ -118,10 +124,10 @@ def brocade_san_switch_alias_creation(alias_name, alias_entry_name, ipaddress):
         print("Alias creation status: ", switch_create_alias.status_code)
         time.sleep(5)
         if switch_create_alias.status_code == 201:
-            print("Alias creation is successful - ", switch_create_alias.status_code)
+            print("Function 03 - Alias creation is successful - ", switch_create_alias.status_code)
     except Exception as e:
         if switch_create_alias.status_code != 201:
-            print("Brocade switch login token or endpoint issues - ", switch_create_alias.status_code)
+            print("Function 03 - Brocade switch login token or endpoint issues - ", switch_create_alias.status_code)
             print(e)
     print()
     print('=================================================================')
@@ -153,10 +159,10 @@ def brocade_san_switch_zone_creation(zone_name, zone_member_entry_name_1, zone_m
         switch_create_zone_json = json.loads(switch_create_zone_element.content)
         time.sleep(5)
         if switch_create_zone_element.status_code == 201:
-            print("Zone creation is successful - ", switch_create_zone_json)
+            print("Function 04 - Zone creation is successful - ", switch_create_zone_json)
     except Exception as e:
         if switch_create_zone_element.status_code != 201:
-            print("Brocade switch login token or endpoint issues - ", switch_create_zone_element.status_code)
+            print("Function 04 - Brocade switch login token or endpoint issues - ", switch_create_zone_element.status_code)
             print(e)
     print()
     print('=================================================================')
@@ -199,10 +205,10 @@ def brocade_san_switch_zone_config_update(zone_name, ipaddress):
         switch_save_zone_json = json.loads(switch_save_zone_element.content)
         time.sleep(5)
         if switch_save_zone_element.status_code == 204:
-            print("Zone configuration update is successful - ", switch_save_zone_json)
+            print("Function 05 - Zone configuration update is successful - ", switch_save_zone_json)
     except Exception as e:
         if switch_save_zone_element.status_code != 204:
-            print("Brocade switch login token or endpoint issues - ", switch_save_zone_element.status_code)
+            print("Function 05 - Brocade switch login token or endpoint issues - ", switch_save_zone_element.status_code)
             print(e)
     print()
     print('=================================================================')
@@ -233,10 +239,10 @@ def brocade_san_switch_save_checksum(ipaddress):
         switch_zonedb_save_zone_json = json.loads(switch_zonedb_save_element.content)
         time.sleep(5)
         if switch_zonedb_save_element.status_code == 204:
-            print("Zone configuration is saved to device successful - ", switch_zonedb_save_zone_json)
+            print("Function 06 - Zone configuration is saved to device successful - ", switch_zonedb_save_zone_json)
     except Exception as e:
         if switch_zonedb_save_element.status_code != 204:
-            print("Brocade switch login token or endpoint issues - ", switch_zonedb_save_element.status_code)
+            print("Function 06 - Brocade switch login token or endpoint issues - ", switch_zonedb_save_element.status_code)
             print(e)
     print()
     print('=================================================================')
@@ -264,10 +270,10 @@ def brocade_san_switch_get_new_checksum(ipaddress):
         print("Status of getting new checksum call - ", switch_zone_get_new_checksum_element.status_code)
         time.sleep(5)
         if switch_zone_get_new_checksum_element.status_code == 200:
-            print("Getting new checksum value successful - ", switch_zone_get_new_checksum_json)
+            print("Function 07 - Getting new checksum value successful - ", switch_zone_get_new_checksum_json)
     except Exception as e:
         if switch_zone_get_new_checksum_element.status_code != 200:
-            print("Brocade switch login token or endpoint issues - ", switch_zone_get_new_checksum_element.status_code)
+            print("Function 07 - Brocade switch login token or endpoint issues - ", switch_zone_get_new_checksum_element.status_code)
             print(e)
     print()
     print('=================================================================')
@@ -297,10 +303,10 @@ def brocade_san_switch_enable_new_config(ipaddress):
               switch_zone_enable_new_config_element.status_code)
         time.sleep(5)
         if switch_zone_enable_new_config_element.status_code == 204:
-            print("Zone configuration is saved to device successful")
+            print("Function 08 - Zone configuration is saved to device successful")
     except Exception as e:
         if switch_zone_enable_new_config_element.status_code != 204:
-            print("Brocade switch login token or endpoint issues - ", switch_zone_enable_new_config_element.status_code)
+            print("Function 08 - Brocade switch login token or endpoint issues - ", switch_zone_enable_new_config_element.status_code)
             print(e)
     print()
     print('=================================================================')
@@ -327,10 +333,10 @@ def brocade_san_switch_alias_deletion(alias_name, alias_entry_name, ipaddress):
         print("Alias deletion status: ", switch_delete_alias.status_code)
         time.sleep(5)
         if switch_delete_alias.status_code == 204:
-            print("Alias deletion is successful - ", switch_delete_alias.status_code)
+            print("Function 09 - Alias deletion is successful - ", switch_delete_alias.status_code)
     except Exception as e:
         if switch_delete_alias.status_code != 204:
-            print("Brocade switch login token or endpoint issues - ", switch_delete_alias.status_code)
+            print("Function 09 - Brocade switch login token or endpoint issues - ", switch_delete_alias.status_code)
             print(e)
     print()
     print('=================================================================')
@@ -354,10 +360,10 @@ def brocade_san_switch_zone_deletion(zone_name, ipaddress):
         print("Switch zone deletion status: ", switch_delete_zone_element.status_code)
         time.sleep(5)
         if switch_delete_zone_element.status_code == 204:
-            print("Zone deletion is successful and return code is - ", switch_delete_zone_element.status_code)
+            print("Function 10 - Zone deletion is successful and return code is - ", switch_delete_zone_element.status_code)
     except Exception as e:
         if switch_delete_zone_element.status_code != 204:
-            print("Brocade switch login token or endpoint issues - ", switch_delete_zone_element.status_code)
+            print("Function 10 - Brocade switch login token or endpoint issues - ", switch_delete_zone_element.status_code)
             print(e)
     print()
     print('=================================================================')
@@ -388,10 +394,10 @@ def brocade_san_switch_zone_delete_config_removal(zone_name, ipaddress):
         switch_save_zone_json = json.loads(switch_save_zone_element.content)
         time.sleep(5)
         if switch_save_zone_element.status_code == 204:
-            print("Zone entry removal and configuration update is successful - ", switch_save_zone_json)
+            print("Function 11 - Zone entry removal and configuration update is successful - ", switch_save_zone_json)
     except Exception as e:
         if switch_save_zone_element.status_code != 204:
-            print("Brocade switch login token or endpoint issues - ", switch_save_zone_element.status_code)
+            print("Function 11 - Brocade switch login token or endpoint issues - ", switch_save_zone_element.status_code)
             print(e)
     print()
     print('=================================================================')
@@ -414,10 +420,10 @@ def brocade_san_switch_logout(custom_api_key, ipaddress):
         print("Token release/logout status: ", switch_token_release.status_code)
         time.sleep(5)
         if switch_token_release.status_code == 204:
-            print("RestAPI token is released successfully - ", switch_token_release.status_code)
+            print("Function 12 - RestAPI token is released successfully - ", switch_token_release.status_code)
     except Exception as e:
         if switch_token_release.status_code != 204:
-            print("Brocade switch login token or endpoint issues - ", switch_token_release.status_code)
+            print("Function 12 - Brocade switch login token or endpoint issues - ", switch_token_release.status_code)
             print(e)
     print()
     print('=================================================================')
@@ -438,13 +444,13 @@ def brocade_san_switch_logout(custom_api_key, ipaddress):
 
 
 # Alias Deletion, Zone Deletion & Zone Config Commit Flow
-brocade_san_switch_login('10.60.22.214', 'admin', 'ctcemc123')
-brocade_san_switch_config_backup('10.60.22.214')
-brocade_san_switch_alias_deletion('Axel_spa_A1Port3_Test', '50:06:01:63:08:60:1d:e8', '10.60.22.214')
-brocade_san_switch_alias_deletion('Rodge_spa_A4Port3_Test', '50:06:01:63:08:64:0f:45', '10.60.22.214')
-brocade_san_switch_zone_deletion('Axel_Rodge_SPA_Test', '10.60.22.214')
-brocade_san_switch_zone_delete_config_removal('Axel_Rodge_SPA_Test', '10.60.22.214')
-brocade_san_switch_save_checksum('10.60.22.214')
-brocade_san_switch_get_new_checksum('10.60.22.214')
-brocade_san_switch_enable_new_config('10.60.22.214')
-brocade_san_switch_logout(custom_api_key, '10.60.22.214')
+# brocade_san_switch_login('10.60.22.214', 'admin', 'ctcemc123')
+# brocade_san_switch_config_backup('10.60.22.214')
+# brocade_san_switch_alias_deletion('Axel_spa_A1Port3_Test', '50:06:01:63:08:60:1d:e8', '10.60.22.214')
+# brocade_san_switch_alias_deletion('Rodge_spa_A4Port3_Test', '50:06:01:63:08:64:0f:45', '10.60.22.214')
+# brocade_san_switch_zone_deletion('Axel_Rodge_SPA_Test', '10.60.22.214')
+# brocade_san_switch_zone_delete_config_removal('Axel_Rodge_SPA_Test', '10.60.22.214')
+# brocade_san_switch_save_checksum('10.60.22.214')
+# brocade_san_switch_get_new_checksum('10.60.22.214')
+# brocade_san_switch_enable_new_config('10.60.22.214')
+# brocade_san_switch_logout(custom_api_key, '10.60.22.214')
