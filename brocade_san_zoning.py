@@ -49,8 +49,11 @@ def brocade_san_switch_login(ipaddress, username, password):
     """
     global custom_api_key
     try:
+        login_call_headers = {'Accept': 'application/yang-data+json', 'Content-Type': 'application/yang-data+json'}
         login_url = 'http://' + ipaddress + '/rest/login'
-        login = requests.request("POST", login_url, auth=HTTPBasicAuth(username, password))
+        # login = requests.request("POST", login_url, auth=HTTPBasicAuth(username, password))
+        login = requests.post(url=login_url, headers=login_call_headers,
+                              auth=HTTPBasicAuth(username, password), verify=False)
         print("Brocade login status code: ", login.status_code)
         time.sleep(5)
         if login.status_code == 200:
@@ -431,7 +434,7 @@ def brocade_san_switch_logout(custom_api_key, ipaddress):
 
 
 # Alias Creation, Zone Creation & Zone Config Commit Flow
-# brocade_san_switch_login('10.60.22.214', 'admin', 'ctcemc123')
+brocade_san_switch_login('10.60.22.214', 'admin', 'ctcemc123')
 # brocade_san_switch_config_backup('10.60.22.214')
 # brocade_san_switch_alias_creation('Axel_spa_A1Port3_Test', '50:06:01:63:08:60:1d:e8', '10.60.22.214')
 # brocade_san_switch_alias_creation('Rodge_spa_A4Port3_Test', '50:06:01:63:08:64:0f:45', '10.60.22.214')
