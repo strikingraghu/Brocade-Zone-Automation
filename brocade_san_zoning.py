@@ -165,7 +165,8 @@ def brocade_san_switch_zone_creation(zone_name, zone_member_entry_name_1, zone_m
             print("Function 04 - Zone creation is successful - ", switch_create_zone_json)
     except Exception as e:
         if switch_create_zone_element.status_code != 201:
-            print("Function 04 - Brocade switch login token or endpoint issues - ", switch_create_zone_element.status_code)
+            print("Function 04 - Brocade switch login token or endpoint issues - ",
+                  switch_create_zone_element.status_code)
             print(e)
     print()
     print('=================================================================')
