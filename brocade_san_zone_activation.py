@@ -3,12 +3,12 @@
 
 from urllib import request
 import requests
-import json
-
 
 documentation = '''
 Python code developed for automating 'Brocade SAN Zoning' tasks performed by Network/Storage team.
 Functions:
+    Connecting to ServiceNow to retrieve RITM values
+    Updating the ServiceNow RITM with 'work-in-progress' state
     Logging into Brocade switch
     Taking backup of existing zone configuration
     Creating alias
@@ -17,6 +17,7 @@ Functions:
     Adding new zones configuration
     Permanently saving switch configuration
     Logout from the Brocade switch
+    Closing the ServiceNow RITM with required updates
 '''
 sys_id = ""
 number = ""
