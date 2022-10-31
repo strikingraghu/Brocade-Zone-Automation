@@ -18,7 +18,6 @@ Functions:
     Logout from the Brocade switch
 '''
 
-snow_endpoint = ""
 
 class BrocadeZoneActivation:
 
@@ -26,7 +25,7 @@ class BrocadeZoneActivation:
 
     def __init__(self, snow_endpoint, snow_user, snow_pass, brocade_ip, username, password, alias_name, wwn, zone_name):
         """Default constructor to initialize the object with values"""
-        self.snow_ip = snow_endpoint
+        self.snow_endpoint = snow_endpoint
         self.snow_user = snow_user
         self.snow_pass = snow_pass
         self.ip = brocade_ip
@@ -38,15 +37,10 @@ class BrocadeZoneActivation:
         print("Default constructor being invoked")
 
 
-    def servicenow_read_data():
+    def servicenow_read_data(self):
         """Fetching the required values from ServiceNow RITM table to execute automation pipeline"""
-        url = "https://" + snow_endpoint + "/api/now/table/sc_req_item/0c75a4162f3a5d107572fe7cf699b680?\
-            sysparm_fields=sys_id%2Cnumber%2Cstate%2C\
-                variables.ip%2C\
-                variables.alias%2C\
-                variables.wwn_1%2C\
-                variables.wwn_2%2C\
-                variables.zone"
+        print("Fetching the required values from ServiceNow RITM table to execute automation pipeline")
+        url = "https://" + self.snow_endpoint + "/api/now/table/sc_req_item/0c75a4162f3a5d107572fe7cf699b680?sysparm_fields=sys_id%2Cnumber%2Cstate%2Cvariables.ip%2Cvariables.alias%2Cvariables.wwn_1%2Cvariables.wwn_2%2Cvariables.zone"
         user = "admin"
         password = "e0uRn=Ph$J4Y"
         headers = {"Content-Type":"application/json","Accept":"application/json"}
@@ -57,4 +51,6 @@ class BrocadeZoneActivation:
         data = response.json()
         print(data)
 
-        
+
+brocade = BrocadeZoneActivation('dev78611.service-now.com', 'admin', 'e0uRn=Ph$J4Y', '10.60.22.214', 'admin', 'ctcemc123', 'Axel_spa_A1Port3_Test, Rodge_spa_A4Port3_Test', '50:06:01:63:08:60:1d:e8, 50:06:01:63:08:64:0f:45', 'Axel_Rodge_SPA_Test')
+brocade.servicenow_read_data()
