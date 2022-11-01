@@ -1,6 +1,7 @@
 #!/usr/bin/python
 # The term 'Broadcom' refers to Broadcom Inc. and/or its subsidiaries.
 
+from urllib import response
 import requests
 
 documentation = '''
@@ -20,6 +21,12 @@ Functions:
 '''
 sys_id = ""
 number = ""
+custom_api_key = ""
+current_config_backup = ""
+pre_change_checksum = ""
+pre_change_cfg_name = ""
+enabled_zones = ""
+zones = []
 
 
 class BrocadeZoneActivation:
@@ -101,14 +108,46 @@ class BrocadeZoneActivation:
         :return: Bearer token for the subsequent Brocade RestAPI calls
         """
         try:
+            print("Login to the Brocade RestAPI and fetch the custom token")
             url = 'http://' + self.ip + '/rest/login'
             user = self.username
             pwd = self.password
             headers = {'Accept': 'application/yang-data+json', 'Content-Type': 'application/yang-data+json'}
             response = requests.post(url, headers=headers, auth=(user, pwd), verify=False)
             if response.status_code == 200:
+                global custom_api_key
                 custom_api_key = response.headers.get('Authorization')
                 print('Custom Token: ', custom_api_key)
+        except Exception as e:
+            if response.status_code != 200:
+                print('Status: ', response.status_code, 'Error Resonse: ', response.json())
+                print(e)
+
+    def brocade_zones_current_configs(self):
+        """
+        :param self: 'self' parameter is a reference to the current instance of the class
+        :return: Configuration backup of the Brocade SAN device before adding new zone to the fabric
+        """
+        try:
+            print("Latest backup of the Brocade SAN switch configuration is stored in cache!")
+            url = 'http://' + self.ip + '/rest/running/brocade-zone/effective-configuration'
+            headers = {'Accept': 'application/yang-data+json', 'Content-Type': 'application/yang-data+json', 'Authorization': custom_api_key}
+            response = requests.get(url, headers=headers)
+            data = response.json()
+            if response.status_code == 200:
+                global current_config_backup
+                current_config_backup = response.content
+                global pre_change_checksum
+                pre_change_checksum = data['Response']['effective-configuration']['checksum']
+                global pre_change_cfg_name
+                pre_change_cfg_name = data['Response']['effective-configuration']['cfg-name']
+                global enabled_zones
+                enabled_zones = data['Response']['effective-configuration']['enabled-zone']
+                for get_zone_name in enabled_zones:
+                    zones.append(enabled_zones[get_zone_name['zone-name']])
+            print("List of all zones before change: ", zones)
+            print("Current checksum value: ", pre_change_checksum)
+            print("Current cfg-name before changes: ", pre_change_cfg_name)
         except Exception as e:
             if response.status_code != 200:
                 print('Status: ', response.status_code, 'Error Resonse: ', response.json())
@@ -121,3 +160,4 @@ brocade = BrocadeZoneActivation('dev78611.service-now.com', 'admin', 'e0uRn=Ph$J
 brocade.servicenow_read_data()
 brocade.servicenow_update_record()
 brocade.brocade_api_login()
+brocade.brocade_zones_current_configs()
