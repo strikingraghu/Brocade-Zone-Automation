@@ -21,7 +21,7 @@ Functions:
 '''
 sys_id = ""
 number = ""
-custom_api_key = ""
+custom_api_key = "Custom_Basic YWRtaW46eHh4OjJlOGI0NmNmMDUwNGFmOGMwNmI0ZGEwYTI0MDA2ODI2NThjOWM0MDVhZGYzMjhlZjQyZmJkNzBmNmQ4MjdkOTE="
 current_config_backup = ""
 pre_change_checksum = ""
 pre_change_cfg_name = ""
@@ -143,11 +143,12 @@ class BrocadeZoneActivation:
                 pre_change_cfg_name = data['Response']['effective-configuration']['cfg-name']
                 global enabled_zones
                 enabled_zones = data['Response']['effective-configuration']['enabled-zone']
+                print(enabled_zones)
                 for get_zone_name in enabled_zones:
-                    zones.append(enabled_zones[get_zone_name['zone-name']])
-            print("List of all zones before change: ", zones)
-            print("Current checksum value: ", pre_change_checksum)
-            print("Current cfg-name before changes: ", pre_change_cfg_name)
+                    zones.append([get_zone_name['zone-name']])
+                print("List of all zones before change: ", zones)
+                print("Current checksum value: ", pre_change_checksum)
+                print("Current cfg-name before changes: ", pre_change_cfg_name)
         except Exception as e:
             if response.status_code != 200:
                 print('Status: ', response.status_code, 'Error Resonse: ', response.json())
@@ -159,5 +160,5 @@ brocade = BrocadeZoneActivation('dev78611.service-now.com', 'admin', 'e0uRn=Ph$J
                                 '50:06:01:63:08:60:1d:e8, 50:06:01:63:08:64:0f:45', 'Axel_Rodge_SPA_Test')
 brocade.servicenow_read_data()
 brocade.servicenow_update_record()
-brocade.brocade_api_login()
+# brocade.brocade_api_login()
 brocade.brocade_zones_current_configs()
