@@ -3,6 +3,7 @@
 
 from urllib import response
 import requests
+import json
 
 documentation = '''
 Python code developed for automating 'Brocade SAN Zoning' tasks performed by Network/Storage team.
@@ -21,7 +22,7 @@ Functions:
 '''
 sys_id = ""
 number = ""
-custom_api_key = "Custom_Basic YWRtaW46eHh4OjQxMjA2YTkyMmI0OGI0MDhlY2NhMWM4N2ExN2UxMGI4NjFhZjVhYjYwYzk3NTE3ZGY3ZWEyNDQzOTBjYTYxYmU="
+custom_api_key = ""
 current_config_backup = ""
 pre_change_checksum = ""
 pre_change_cfg_name = ""
@@ -32,7 +33,7 @@ zones = []
 class BrocadeZoneActivation:
     """Code developed for automating 'Brocade SAN Zoning' tasks performed by Network/Storage team."""
 
-    def __init__(self, snow_endpoint, snow_user, snow_pass, brocade_ip, username, password, alias_name, wwn, zone_name):
+    def __init__(self, snow_endpoint, snow_user, snow_pass, brocade_ip, username, password, alias_name_1, wwn_1, alias_name_2, wwn_2, zone_name):
         """
         :param snow_endpoint: ServiceNow dev instance endpoint
         :param snow_user: ServiceNow username for RestAPI calls
@@ -51,16 +52,18 @@ class BrocadeZoneActivation:
         self.ip = brocade_ip
         self.username = username
         self.password = password
-        self.alias_name = alias_name
-        self.wwn = wwn
+        self.alias_name_1 = alias_name_1
+        self.wwn_1 = wwn_1
+        self.alias_name_2 = alias_name_2
+        self.wwn_2 = wwn_2
         self.zone_name = zone_name
         print("Default constructor being invoked")
 
     def servicenow_read_data(self):
         """
         :param self: 'self' parameter is a reference to the current instance of the class
-        :return: RITM sysid required for subsequent calls
-        :return: RITM number, where this is coming from ServiceNow RITM table
+        :return: As a global variable, RITM sysid required for subsequent calls
+        :return: As a global variable, RITM number, where this is coming from ServiceNow RITM table
         """
         try:
             print("Fetching the required values from ServiceNow RITM table to execute automation pipeline")
@@ -105,7 +108,7 @@ class BrocadeZoneActivation:
     def api_login(self):
         """
         :param self: 'self' parameter is a reference to the current instance of the class
-        :return: Bearer token for the subsequent Brocade RestAPI calls
+        :return: As a global variable, Bearer token for the subsequent Brocade RestAPI calls
         """
         try:
             print("Login to the Brocade RestAPI and fetch the custom token")
@@ -126,7 +129,7 @@ class BrocadeZoneActivation:
     def zones_current_configs(self):
         """
         :param self: 'self' parameter is a reference to the current instance of the class
-        :return: Configuration backup of the Brocade SAN device before adding new zone to the fabric
+        :return: As a global variable, configuration backup of the Brocade SAN device
         """
         try:
             print("Latest backup of the Brocade SAN switch configuration is stored in cache!")
@@ -161,17 +164,31 @@ class BrocadeZoneActivation:
         """
         try:
             print("Aliases will be created for provided WWWNs in the ServiceNow RITM record")
+            url = 'http://' + self.ip + '/rest/running/brocade-zone/defined-configuration/alias'
+            headers = {'Accept': 'application/yang-data+json', 'Content-Type': 'application/yang-data+json', 'Authorization': custom_api_key}
+            body = {'alias': {'alias-name': self.alias_name_1, 'member-entry': {'alias-entry-name': self.wwn_1}}}
+            body_json_compatible = json.dumps(body, indent=3)
+            response = requests.post(url=url, headers=headers, data=body_json_compatible, verify=False)
+            alias_1 = response.status_code
+            if alias_1 == 201:
+                print("Alias " + self.alias_name_1 + "creation status successful", response.json())
+                body = {'alias': {'alias-name': self.alias_name_2, 'member-entry': {'alias-entry-name': self.wwn_2}}}
+                body_json_compatible = json.dumps(body, indent=3)                
+                response = requests.post(url=url, headers=headers, data=body_json_compatible, verify=False)
+                alias_2 = response.status_code
+                if alias_2 == 201:
+                    print("Alias " + self.alias_name_2 + "creation status successful", response.json())
         except Exception as e:
-            print(e)
-
-
+            if alias_1 | alias_2 != 201:
+                print('Status: ', response.status_code, 'Error Resonse: ', response.json())
+                print(e)
 
 
 brocade = BrocadeZoneActivation('dev78611.service-now.com', 'admin', 'e0uRn=Ph$J4Y', '10.60.22.214', 'admin',
-                                'ctcemc123', 'Axel_spa_A1Port3_Test, Rodge_spa_A4Port3_Test',
-                                '50:06:01:63:08:60:1d:e8, 50:06:01:63:08:64:0f:45', 'Axel_Rodge_SPA_Test')
+                                'ctcemc123', 'Axel_SPA_A1Port3_Test', '50:06:01:63:08:60:1d:e8', 'Rodge_SPA_A4Port3_Test',
+                                '50:06:01:63:08:64:0f:45', 'Axel_Rodge_SPA_Test')
 brocade.servicenow_read_data()
 brocade.servicenow_update_record()
-# brocade.api_login()
+brocade.api_login()
 brocade.zones_current_configs()
 brocade.alias_creation()
