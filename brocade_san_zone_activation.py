@@ -21,7 +21,7 @@ Functions:
 '''
 sys_id = ""
 number = ""
-custom_api_key = "Custom_Basic YWRtaW46eHh4OjJlOGI0NmNmMDUwNGFmOGMwNmI0ZGEwYTI0MDA2ODI2NThjOWM0MDVhZGYzMjhlZjQyZmJkNzBmNmQ4MjdkOTE="
+custom_api_key = "Custom_Basic YWRtaW46eHh4OjQxMjA2YTkyMmI0OGI0MDhlY2NhMWM4N2ExN2UxMGI4NjFhZjVhYjYwYzk3NTE3ZGY3ZWEyNDQzOTBjYTYxYmU="
 current_config_backup = ""
 pre_change_checksum = ""
 pre_change_cfg_name = ""
@@ -102,7 +102,7 @@ class BrocadeZoneActivation:
             if response.status_code != 200:
                 print('Status: ', response.status_code, 'Headers: ', response.headers, 'Error Response: ', response.json())
 
-    def brocade_api_login(self):
+    def api_login(self):
         """
         :param self: 'self' parameter is a reference to the current instance of the class
         :return: Bearer token for the subsequent Brocade RestAPI calls
@@ -123,7 +123,7 @@ class BrocadeZoneActivation:
                 print('Status: ', response.status_code, 'Error Resonse: ', response.json())
                 print(e)
 
-    def brocade_zones_current_configs(self):
+    def zones_current_configs(self):
         """
         :param self: 'self' parameter is a reference to the current instance of the class
         :return: Configuration backup of the Brocade SAN device before adding new zone to the fabric
@@ -154,11 +154,24 @@ class BrocadeZoneActivation:
                 print('Status: ', response.status_code, 'Error Resonse: ', response.json())
                 print(e)
 
+    def alias_creation(self):
+        """
+        :param self: 'self' parameter is a reference to the current instance of the class
+        :return: None
+        """
+        try:
+            print("Aliases will be created for provided WWWNs in the ServiceNow RITM record")
+        except Exception as e:
+            print(e)
+
+
+
 
 brocade = BrocadeZoneActivation('dev78611.service-now.com', 'admin', 'e0uRn=Ph$J4Y', '10.60.22.214', 'admin',
                                 'ctcemc123', 'Axel_spa_A1Port3_Test, Rodge_spa_A4Port3_Test',
                                 '50:06:01:63:08:60:1d:e8, 50:06:01:63:08:64:0f:45', 'Axel_Rodge_SPA_Test')
 brocade.servicenow_read_data()
 brocade.servicenow_update_record()
-# brocade.brocade_api_login()
-brocade.brocade_zones_current_configs()
+# brocade.api_login()
+brocade.zones_current_configs()
+brocade.alias_creation()
