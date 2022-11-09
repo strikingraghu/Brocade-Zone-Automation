@@ -1,7 +1,6 @@
 #!/usr/bin/python
 # The term 'Broadcom' refers to Broadcom Inc. and/or its subsidiaries.
 
-from urllib import response
 import requests
 import json
 
@@ -22,7 +21,7 @@ Functions:
 '''
 sys_id = ""
 number = ""
-custom_api_key = ""
+custom_api_key = "Custom_Basic YWRtaW46eHh4Ojk5MWVhOTcwZThhYzM3MWY0YjBiYzU2YzA3OWFmYjM3ZjUwOGZmNDhmODc2MjgzZjA2NDgwYjFiNzg5ZTBkY2U="
 current_config_backup = ""
 pre_change_checksum = ""
 pre_change_cfg_name = ""
@@ -170,12 +169,14 @@ class BrocadeZoneActivation:
             body_json_compatible = json.dumps(body, indent=3)
             response = requests.post(url=url, headers=headers, data=body_json_compatible, verify=False)
             alias_1 = response.status_code
+            print(alias_1)
             if alias_1 == 201:
                 print("Alias " + self.alias_name_1 + "creation status successful", response.json())
                 body = {'alias': {'alias-name': self.alias_name_2, 'member-entry': {'alias-entry-name': self.wwn_2}}}
                 body_json_compatible = json.dumps(body, indent=3)                
                 response = requests.post(url=url, headers=headers, data=body_json_compatible, verify=False)
                 alias_2 = response.status_code
+                print(alias_2)
                 if alias_2 == 201:
                     print("Alias " + self.alias_name_2 + "creation status successful", response.json())
         except Exception as e:
@@ -185,10 +186,10 @@ class BrocadeZoneActivation:
 
 
 brocade = BrocadeZoneActivation('dev78611.service-now.com', 'admin', 'e0uRn=Ph$J4Y', '10.60.22.214', 'admin',
-                                'ctcemc123', 'Axel_SPA_A1Port3_Test', '50:06:01:63:08:60:1d:e8', 'Rodge_SPA_A4Port3_Test',
+                                'ctcemc123', 'Axel_Spa_A1Port3_Test', '50:06:01:63:08:60:1d:e8', 'Rodge_Spa_A4Port3_Test',
                                 '50:06:01:63:08:64:0f:45', 'Axel_Rodge_SPA_Test')
 brocade.servicenow_read_data()
 brocade.servicenow_update_record()
-brocade.api_login()
+# brocade.api_login()
 brocade.zones_current_configs()
 brocade.alias_creation()
