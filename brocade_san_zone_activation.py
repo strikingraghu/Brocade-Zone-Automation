@@ -19,20 +19,22 @@ Functions:
     Logout from the Brocade switch
     Closing the ServiceNow RITM with required updates
 '''
-sys_id = ""
-number = ""
-custom_api_key = ""
-current_config_backup = ""
-pre_change_checksum = ""
-pre_change_cfg_name = ""
-enabled_zones = ""
-zones = []
 
 
 class BrocadeZoneActivation:
     """Code developed for automating 'Brocade SAN Zoning' tasks performed by Network/Storage team."""
 
-    def __init__(self, snow_endpoint, snow_user, snow_pass, brocade_ip, username, password, alias_name_1, wwn_1, alias_name_2, wwn_2, zone_name):
+    sys_id = ""
+    number = ""
+    custom_api_key = ""
+    current_config_backup = ""
+    pre_change_checksum = ""
+    pre_change_cfg_name = ""
+    enabled_zones = ""
+    zones = []
+
+    def __init__(self, snow_endpoint, snow_user, snow_pass, brocade_ip, username, password, alias_name_1, wwn_1,
+                 alias_name_2, wwn_2, zone_name):
         """
         :param snow_endpoint: ServiceNow dev instance endpoint
         :param snow_user: ServiceNow username for RestAPI calls
@@ -67,8 +69,8 @@ class BrocadeZoneActivation:
         try:
             print("Fetching the required values from ServiceNow RITM table to execute automation pipeline")
             url = "https://" + self.snow_endpoint + "/api/now/table/sc_req_item/0c75a4162f3a5d107572fe7cf699b680?" \
-                "sysparm_fields=sys_id%2Cnumber%2Cstate%2Cvariables.ip%2C" \
-                    "variables.alias%2Cvariables.wwn_1%2Cvariables.wwn_2%2Cvariables.zone"
+                                                    "sysparm_fields=sys_id%2Cnumber%2Cstate%2Cvariables.ip%2C" \
+                                                    "variables.alias%2Cvariables.wwn_1%2Cvariables.wwn_2%2Cvariables.zone"
             user = self.snow_user
             password = self.snow_pass
             headers = {"Content-Type": "application/json", "Accept": "application/json"}
@@ -82,7 +84,8 @@ class BrocadeZoneActivation:
                 number = data['result']['number']
         except Exception as e:
             if response.status_code != 200:
-                print('Status: ', response.status_code, 'Headers: ', response.headers, 'Error Response: ', response.json())
+                print('Status: ', response.status_code, 'Headers: ', response.headers, 'Error Response: ',
+                      response.json())
                 print(e)
 
     def servicenow_update_record(self):
@@ -102,7 +105,8 @@ class BrocadeZoneActivation:
                 print("RITM state = ", data['result']['state'])
         except Exception as e:
             if response.status_code != 200:
-                print('Status: ', response.status_code, 'Headers: ', response.headers, 'Error Response: ', response.json())
+                print('Status: ', response.status_code, 'Headers: ', response.headers, 'Error Response: ',
+                      response.json())
 
     def api_login(self):
         """
@@ -133,7 +137,8 @@ class BrocadeZoneActivation:
         try:
             print("Latest backup of the Brocade SAN switch configuration is stored in cache!")
             url = 'http://' + self.ip + '/rest/running/brocade-zone/effective-configuration'
-            headers = {'Accept': 'application/yang-data+json', 'Content-Type': 'application/yang-data+json', 'Authorization': custom_api_key}
+            headers = {'Accept': 'application/yang-data+json', 'Content-Type': 'application/yang-data+json',
+                       'Authorization': custom_api_key}
             response = requests.get(url, headers=headers)
             data = response.json()
             if response.status_code == 200:
@@ -164,7 +169,8 @@ class BrocadeZoneActivation:
         try:
             print("Aliases will be created for provided WWWNs in the ServiceNow RITM record")
             url = 'http://' + self.ip + '/rest/running/brocade-zone/defined-configuration/alias'
-            headers = {'Accept': 'application/yang-data+json', 'Content-Type': 'application/yang-data+json', 'Authorization': custom_api_key}
+            headers = {'Accept': 'application/yang-data+json', 'Content-Type': 'application/yang-data+json',
+                       'Authorization': custom_api_key}
             body = {'alias': {'alias-name': self.alias_name_1, 'member-entry': {'alias-entry-name': self.wwn_1}}}
             body_json_compatible = json.dumps(body, indent=3)
             response = requests.post(url=url, headers=headers, data=body_json_compatible, verify=False)
@@ -173,7 +179,7 @@ class BrocadeZoneActivation:
             if alias_1 == 201:
                 print("Alias " + self.alias_name_1 + "creation status successful", response.json())
                 body = {'alias': {'alias-name': self.alias_name_2, 'member-entry': {'alias-entry-name': self.wwn_2}}}
-                body_json_compatible = json.dumps(body, indent=3)                
+                body_json_compatible = json.dumps(body, indent=3)
                 response = requests.post(url, headers=headers, data=body_json_compatible, verify=False)
                 alias_2 = response.status_code
                 print(alias_2)
@@ -192,9 +198,10 @@ class BrocadeZoneActivation:
         try:
             print("Zone will be created taking the aliases into consideration")
             url = 'http://' + self.ip + '/rest/running/brocade-zone/defined-configuration/zone'
-            headers = {'Accept': 'application/yang-data+json', 'Content-Type': 'application/yang-data+json', 'Authorization': custom_api_key}
+            headers = {'Accept': 'application/yang-data+json', 'Content-Type': 'application/yang-data+json',
+                       'Authorization': custom_api_key}
             body = {'zone': {'zone-name': self.zone_name, 'zone-type': 0,
-                          'member-entry': {'entry-name': [self.alias_name_1, self.alias_name_2]}}}
+                             'member-entry': {'entry-name': [self.alias_name_1, self.alias_name_2]}}}
             body_json_compatible = json.dumps(body, indent=3)
             response = requests.post(url, headers=headers, data=body_json_compatible, verify=False)
             data = response.json()
@@ -205,9 +212,16 @@ class BrocadeZoneActivation:
                 print("Zone creation is not successful", response.json())
                 print(e)
 
+    def zone_config_update(self):
+        """
+        :param self: 'self' parameter is a reference to the current instance of the class
+        :return: None
+        """
+
 
 brocade = BrocadeZoneActivation('dev78611.service-now.com', 'admin', 'e0uRn=Ph$J4Y', '10.60.22.214', 'admin',
-                                'ctcemc123', 'Axel_Spa_A1Port3_Test', '50:06:01:63:08:60:1d:e8', 'Rodge_Spa_A4Port3_Test',
+                                'ctcemc123', 'Axel_Spa_A1Port3_Test', '50:06:01:63:08:60:1d:e8',
+                                'Rodge_Spa_A4Port3_Test',
                                 '50:06:01:63:08:64:0f:45', 'Axel_Rodge_SPA_Test')
 brocade.servicenow_read_data()
 brocade.servicenow_update_record()
