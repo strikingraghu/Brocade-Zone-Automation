@@ -33,10 +33,11 @@ class BrocadeZoneActivation:
     enabled_zones = ""
     zones = []
 
-    def __init__(self, snow_endpoint, snow_user, snow_pass, brocade_ip, username, password, alias_name_1, wwn_1,
-                 alias_name_2, wwn_2, zone_name):
+    def __init__(self, snow_endpoint, ritm_sysid, snow_user, snow_pass, brocade_ip, username, password, alias_name_1,
+                 wwn_1, alias_name_2, wwn_2, zone_name):
         """
         :param snow_endpoint: ServiceNow dev instance endpoint
+        :param ritm_sysid: ServiceNow catalog item sysid in ServiceNow platform
         :param snow_user: ServiceNow username for RestAPI calls
         :param snow_pass: ServiceNow password for calling RestAPI calls
         :param brocade_ip: Brocade dev instance IP address
@@ -68,9 +69,9 @@ class BrocadeZoneActivation:
         """
         try:
             print("Fetching the required values from ServiceNow RITM table to execute automation pipeline")
-            url = "https://" + self.snow_endpoint + "/api/now/table/sc_req_item/0c75a4162f3a5d107572fe7cf699b680?" \
-                                                    "sysparm_fields=sys_id%2Cnumber%2Cstate%2Cvariables.ip%2C" \
-                                                    "variables.alias%2Cvariables.wwn_1%2Cvariables.wwn_2%2Cvariables.zone"
+            url = "https://" + self.snow_endpoint + "/api/now/table/sc_req_item/" + self.ritm_sysid + "?sysparm_fields=" \
+                                                    "sys_id%2Cnumber%2Cstate%2Cvariables.ip%2Cvariables.alias%2C" \
+                                                    "variables.wwn_1%2Cvariables.wwn_2%2Cvariables.zone"
             user = self.snow_user
             password = self.snow_pass
             headers = {"Content-Type": "application/json", "Accept": "application/json"}
