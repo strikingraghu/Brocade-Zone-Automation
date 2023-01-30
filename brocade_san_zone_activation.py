@@ -24,7 +24,7 @@ Functions:
 class BrocadeZoneActivation:
     """Code developed for automating 'Brocade SAN Zoning' tasks performed by Network/Storage team."""
 
-    sys_id = ""
+    sysid = ""
     number = ""
     custom_api_key = ""
     current_config_backup = ""
@@ -33,22 +33,25 @@ class BrocadeZoneActivation:
     enabled_zones = ""
     zones = []
 
-    def __init__(self, snow_endpoint, ritm_sysid, snow_user, snow_pass, brocade_ip, username, password, alias_name_1,
+    def __init__(self, snow_endpoint, rsysid, snow_user, snow_pass, brocade_ip, username, password, alias_name_1,
                  wwn_1, alias_name_2, wwn_2, zone_name):
         """
         :param snow_endpoint: ServiceNow dev instance endpoint
-        :param ritm_sysid: ServiceNow catalog item sysid in ServiceNow platform
+        :param rsysid: ServiceNow catalog item sysid in ServiceNow platform
         :param snow_user: ServiceNow username for RestAPI calls
         :param snow_pass: ServiceNow password for calling RestAPI calls
         :param brocade_ip: Brocade dev instance IP address
         :param username: Brocade Fabric OS RestAPI username
         :param password: Brocade Fabric OS RestAPI password
-        :param alias_name: Alias for the Host to Storage zone
-        :param wwn: World-wide Name of HBA (Node)
+        :param alias_name_1: Alias for the Host to Storage zone
+        :param wwn_1: World-wide Name of HBA (Node)
+        :param alias_name_2: Alias for the Host to Storage zone
+        :param wwn_2: World-wide Name of HBA (Node)
         :param zone_name: Host to Storage mapping zone name
         """
 
         self.snow_endpoint = snow_endpoint
+        self.rsysid = rsysid
         self.snow_user = snow_user
         self.snow_pass = snow_pass
         self.ip = brocade_ip
@@ -69,7 +72,7 @@ class BrocadeZoneActivation:
         """
         try:
             print("Fetching the required values from ServiceNow RITM table to execute automation pipeline")
-            url = "https://" + self.snow_endpoint + "/api/now/table/sc_req_item/" + self.ritm_sysid + "?sysparm_fields=" \
+            url = "https://" + self.snow_endpoint + "/api/now/table/sc_req_item/" + self.rsysid + "?sysparm_fields=" \
                                                     "sys_id%2Cnumber%2Cstate%2Cvariables.ip%2Cvariables.alias%2C" \
                                                     "variables.wwn_1%2Cvariables.wwn_2%2Cvariables.zone"
             user = self.snow_user
@@ -83,6 +86,7 @@ class BrocadeZoneActivation:
                 sys_id = data['result']['sys_id']
                 global number
                 number = data['result']['number']
+                print("SysID generated & RITM number = ", sys_id, " & ", number)
         except Exception as e:
             if response.status_code != 200:
                 print('Status: ', response.status_code, 'Headers: ', response.headers, 'Error Response: ',
